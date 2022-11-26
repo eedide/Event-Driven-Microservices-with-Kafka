@@ -1,0 +1,279 @@
+version: "3.8"
+
+services:
+  mysql1:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/mysql1/Dockerfile
+    container_name: mysql1
+    command: --default-authentication-plugin=mysql_native_password --binlog-expire-logs-seconds=4294967295 --bind-address=0.0.0.0 --skip-name-resolve=OFF
+    restart: unless-stopped
+    env_file:
+     ./mysql.env
+    #ports:
+      # <host port> : < MySQL Port running inside container>
+      #- 3406:3306
+    expose:
+      # Opens port 3306 on the container
+      #- 3306
+      - 33061
+    volumes:
+      - ./mysql1data:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - internalnet
+
+  mysql2:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/mysql2/Dockerfile
+    container_name: mysql2
+    command: --default-authentication-plugin=mysql_native_password --binlog-expire-logs-seconds=4294967295 --bind-address=0.0.0.0 --skip-name-resolve=OFF
+    restart: unless-stopped
+    env_file:
+     ./mysql.env
+    #ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      #- 3407:3306
+    expose:
+      # Opens port 3306 on the container
+      #- 3306
+      - 33061
+    volumes:
+      - ./mysql2data:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - internalnet
+
+  mysql3:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/mysql3/Dockerfile
+    container_name: mysql3
+    command: --default-authentication-plugin=mysql_native_password --binlog-expire-logs-seconds=4294967295 --bind-address=0.0.0.0 --skip-name-resolve=OFF
+    restart: unless-stopped
+    env_file:
+     ./mysql.env
+    #ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      #- 3408:3306
+    expose:
+      # Opens port 3306 on the container
+      #- 3306
+      - 33061
+    volumes:
+      - ./mysql3data:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - internalnet
+
+  #mysqlcluster-conf:
+    #build: 
+      #context: ../Sign-up
+      #dockerfile: ./docker/mysqlcluster/Dockerfile
+    #container_name: mysqlcluster-conf
+    #restart: unless-stopped
+    #ports:
+      #- 2999:2999
+    #depends_on:
+      #- mysql1
+      #- mysql2
+      #- mysql3
+    #networks:
+      #- internalnet
+
+  zookeeper1:
+    image: zookeeper
+    container_name: zookeeper1
+    restart: unless-stopped
+    ports:
+      - 2181:2181
+    environment:
+      - ZOO_LOG4J_PROP="INFO,ROLLINGFILE"
+    networks:
+      - internalnet
+    volumes:
+      - ./zookeeper/zookeeper1/data:/data
+      - ./zookeeper/zookeeper1/datalog:/datalog
+      - ./zookeeper/zookeeper1/logs:/logs
+      - ./zookeeper/zookeeper1/config/zoo.cfg:/zookeeper/conf/zoo.cfg
+      - ./zookeeper/zookeeper1/myid:/zookeeper/data/myid
+
+  kafka1:
+    image: debezium/kafka:latest
+    hostname: kafka1
+    container_name: kafka1
+    restart: unless-stopped
+    ports:
+     - 29092:29092
+    links:
+     - zookeeper1
+    #depends_on:
+     #- zookeeper1
+    environment:
+     - BROKER_ID=1
+     - ZOOKEEPER_CONNECT=zookeeper1:2181
+     - ADVERTISED_HOST_NAME=kafka1
+     - LISTENERS=LISTENER_BOB://kafka1:9092,LISTENER_FRED://localhost:29092
+     - ADVERTISED_LISTENERS=LISTENER_BOB://kafka1:9092,LISTENER_FRED://localhost:29092
+     - LISTENER_SECURITY_PROTOCOL_MAP=LISTENER_BOB:PLAINTEXT,LISTENER_FRED:PLAINTEXT
+     - INTER_BROKER_LISTENER_NAME=LISTENER_BOB
+     - ZOOKEEPER_CONNECTION_TIMEOUT_MS=60000
+     #- ZOOKEEPER_SESSION_TIMEOUT_MS=60000
+     #- DEFAULT_REPLICATION_FACTOR=3
+     #- offsets_topic_replication_factor=3
+     #- TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+     - SESSION_TIMEOUT_MS=120000
+     - HEARTBEAT_INTERVAL_MS=3000
+     - AUTO_CREATE_TOPICS_ENABLE=true
+    networks:
+      - internalnet
+    volumes:
+      - ./kafka/kafka1/kafka_data:/kafka/data
+      - ./kafka/kafka1/kafka_logs:/kafka/logs
+
+  connect:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/connect/Dockerfile
+    container_name: connect
+    restart: unless-stopped
+    ports:
+      - 8083:8083
+    environment:
+      - BOOTSTRAP_SERVERS=kafka1:9092
+      - GROUP_ID=my_connect_cluster_1
+      - CONFIG_STORAGE_TOPIC=connect_configs
+      - OFFSET_STORAGE_TOPIC=connect_offsets
+      - STATUS_STORAGE_TOPIC=connect_statuses
+      #- CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR=3
+      #- CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR=3
+      #- CONNECT_STATUS_STORAGE_REPLICATION_FACTOR=3
+      - OFFSET_FLUSH_INTERVAL_MS=10000
+      - OFFSET_FLUSH_TIMEOUT_MS=120000
+    links:
+      #- zookeeper1
+      - kafka1
+      - mysql1
+      - mysql2
+      - mysql3
+    networks:
+      - internalnet
+
+  signup:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/signup/Dockerfile
+    #container_name: signup
+    restart: unless-stopped
+    #ports: 
+      #- 3000:3000
+    #expose:
+      # Opens port 3000 on the container
+      #- 3000
+    volumes: 
+      - ./:/app
+      - "/app/node_modules"
+    depends_on: 
+      - mysql1
+      - mysql2
+      - mysql3
+      - zookeeper1
+      - kafka1
+      - connect
+    networks:
+      - internalnet
+
+  mysqlrouter111:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/mysqlrouter111/Dockerfile
+    container_name: mysqlrouter111
+    command: /usr/sbin/init
+    ports:
+     - 3606:3306
+    expose:
+     - 3306
+    privileged: true
+    depends_on:
+     - signup
+    volumes:
+     - ./mysqlrouter111/keepalived/keepalived1/keepalived.conf:/etc/keepalived/keepalived.conf
+    networks:
+     - internalnet
+
+  mysqlroute222:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/mysqlrouter222/Dockerfile
+    container_name: mysqlrouter222
+    command: /usr/sbin/init
+    ports:
+     - 3607:3306
+    expose:
+     - 3306
+    privileged: true
+    depends_on:
+     - signup
+    volumes:
+     - ./mysqlrouter222/keepalived/keepalived2/keepalived.conf:/etc/keepalived/keepalived.conf
+    networks:
+     - internalnet
+
+  lbserver1:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/LB_Server1/Dockerfile
+    container_name: lbserver1
+    command: /usr/sbin/init
+    ports:
+     - 8080:80
+    privileged: true
+    depends_on:
+     - signup
+    volumes:
+     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+     - ./nginx/keepalived/check_nginx.sh:/etc/keepalived/check_nginx.sh
+     - ./nginx/keepalived/keepalived1/vip1.sh:/etc/keepalived/vip1.sh
+     - ./nginx/keepalived/keepalived1/keepalived.conf:/etc/keepalived/keepalived.conf
+     - ./nginx/startnginx.sh:/etc/nginx/startnginx.sh
+    networks:
+     - internalnet
+
+  lbserver2:
+    build: 
+      context: ../Sign-up
+      dockerfile: ./docker/LB_Server2/Dockerfile
+    container_name: lbserver2
+    command: /usr/sbin/init
+    ports:
+     - 8084:80
+    privileged: true
+    depends_on:
+     - signup
+    volumes:
+     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+     - ./nginx/keepalived/check_nginx.sh:/etc/keepalived/check_nginx.sh
+     - ./nginx/keepalived/keepalived2/vip2.sh:/etc/keepalived/vip2.sh
+     - ./nginx/keepalived/keepalived2/keepalived.conf:/etc/keepalived/keepalived.conf
+     - ./nginx/startnginx.sh:/etc/nginx/startnginx.sh
+    networks:
+     - internalnet
+
+  #LB_Test:
+    #image: centos
+    #container_name: Test_Container
+    #command: /usr/sbin/init
+    #ports:
+     #- 8082:80
+    #privileged: true
+    #depends_on:
+     #- signup
+     #- lbserver1
+     #- lbserver2
+    #networks:
+     #- internalnet
+
+networks:
+  internalnet:
+    driver: bridge

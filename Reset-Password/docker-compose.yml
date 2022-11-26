@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  rpwd_mysql:
+    build: 
+      context: ../Reset-Password
+      dockerfile: ./docker/DockerFile
+    container_name: rpwd_mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    env_file:
+     ./mysql.env
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - 4306:3306
+    expose:
+      # Opens port 3306 on the container
+      - 3306
+    volumes:
+      - ./RPWD_mysqldata:/var/lib/mysql
+    networks:
+      - netWK
+
+  resetpassword:
+    build: 
+      context: ../Reset-Password
+      dockerfile: Dockerfile
+    container_name: resetpassword
+    ports: 
+      - 4001:4001
+    expose:
+      # Opens port 4001 on the container
+      - 4001
+    volumes: 
+      - ./:/appresetpw
+      - "/appresetpw/node_modules"
+    depends_on:
+      - rpwd_mysql
+    networks:
+      - netWK
+
+networks:
+  netWK:
+    driver: bridge

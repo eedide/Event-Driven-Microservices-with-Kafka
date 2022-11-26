@@ -1,0 +1,13 @@
+./node_modules
+.gitignore
+./Dockerfile
+./node_modules
+./.env
+./.dockerignore
+./kafka
+./mysql.env
+./mysqlrouter.env
+./smartdev.env
+./mysql1data
+./mysql2data
+./mysql3data

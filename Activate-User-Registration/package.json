@@ -1,0 +1,32 @@
+{
+    "name": "activate-user-registration",
+    "version": "1.0.0",
+    "description": "",
+    "main": "activate-user-registration",
+    "scripts": {
+        "start": "nodemon -L Activate_User.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "dotenv": "^16.0.0",
+        "express": "^4.17.2",
+        "express-mysql-session": "^2.1.7",
+        "express-openid-connect": "^2.6.0",
+        "express-session": "^1.17.2",
+        "helmet": "^6.0.0",
+        "jsonwebtoken": "^8.5.1",
+        "kafkajs": "^1.16.0",
+        "mongoose": "^6.4.0",
+        "mysql": "^2.18.1",
+        "node-datetime": "^2.1.2",
+        "nodemailer": "^6.7.3",
+        "promise": "^8.1.0",
+        "redis": "^2.8.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.15"
+    }
+}

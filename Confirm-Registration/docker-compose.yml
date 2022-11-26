@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+  confirmuserreg:
+    build: 
+      context: ../Confirm-Registration
+      dockerfile: Dockerfile
+    container_name: confirmuserreg
+    ports: 
+      - 5000:5000
+    expose:
+      # Opens port 5000 on the container
+      - 5000
+    volumes: 
+      - .:/appdev
+      - "/appdev/node_modules"
+    #command: 'bash -c "docker network connect sign-up_internalnet confirmuserreg"'
+
+  rds:
+    image: redis:7.0-rc2
+    container_name: redis
+    command: redis-server /etc/customconfig/redis.conf
+    volumes:
+      - ./redis/redis.conf:/etc/customconfig/redis.conf
+      - ./redis/etc/sysctl.conf:/etc/sysctl.conf
+      - redis-data:/data
+    ports:
+      - 6379:6379
+    expose:
+      - 6379
+    #command:
+      #!/usr/bin/bash
+      #docker network connect sign-up_internalnet redis-1
+
+  rds-1:
+    image: redis:7.0-rc2
+    container_name: redis-slave1
+    command: redis-server /etc/customconfig/redis.conf
+    volumes:
+      - ./redis-slave1/redis.conf:/etc/customconfig/redis.conf
+      - ./redis-slave1/etc/sysctl.conf:/etc/sysctl.conf
+      - redis-slave1-data:/data
+    ports:
+      - 6380:6379
+    expose:
+      - 6379
+    #command:
+      #!/usr/bin/bash
+      #docker network connect sign-up_internalnet redis-2
+
+  rds-2:
+    image: redis:7.0-rc2
+    container_name: redis-slave2
+    command: redis-server /etc/customconfig/redis.conf
+    volumes:
+      - ./redis-slave2/redis.conf:/etc/customconfig/redis.conf
+      - ./redis-slave2/etc/sysctl.conf:/etc/sysctl.conf
+      - redis-slave2-data:/data
+    ports:
+      - 6381:6379
+    expose:
+      - 6379
+    #command:
+      #!/usr/bin/bash
+      #docker network connect sign-up_internalnet redis-3
+
+  sentinel-0:
+    image: redis:7.0-rc2
+    container_name: sentinel-0
+    command: redis-sentinel /etc/customconfig/sentinel.conf
+    volumes:
+      - ./sentinel-0/:/etc/customconfig/
+    ports:
+      - 26379:26379
+    expose:
+      - 26379
+
+  sentinel-1:
+    image: redis:7.0-rc2
+    container_name: sentinel-1
+    command: redis-sentinel /etc/customconfig/sentinel.conf
+    volumes:
+      - ./sentinel-1/:/etc/customconfig/
+    ports:
+      - 26380:26380
+    expose:
+      - 26380
+
+  sentinel-2:
+    image: redis:7.0-rc2
+    container_name: sentinel-2
+    command: redis-sentinel /etc/customconfig/sentinel.conf
+    volumes:
+      - ./sentinel-2/:/etc/customconfig/
+    ports:
+      - 26381:26381
+    expose:
+      - 26381
+
+volumes:
+  redis-data:
+  redis-slave1-data:
+  redis-slave2-data:

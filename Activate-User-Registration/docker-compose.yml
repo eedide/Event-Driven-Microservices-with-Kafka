@@ -1,0 +1,105 @@
+version: "3.8"
+
+services:
+  #Shared internal authentication keys container for replica set
+  mongo-keys:
+    image: depop/openssl-bats
+    command: 'bash -c "openssl rand -base64 741 > /mongo-conf/mongodb-keyfile; chmod 600 /mongo-conf/mongodb-keyfile; chown 999 /mongo-conf/mongodb-keyfile"'
+    volumes:
+      - ./mongo/keys:/mongo-conf
+    networks:
+      - mongonet
+
+  # first, we define the three mongo servers that will act as replicas
+  mongodb1:
+    image: mongo:latest
+    hostname: mongodb1
+    container_name: mongodb1
+    ports:
+     - 30011:27017
+    restart: always
+    volumes:
+      - ./mongo/keys:/opt/keyfile/
+      - ./mongo/data/mongodb1:/data/db
+      - ./mongo/mongod.conf:/etc/mongod.conf
+      - ./mongo/logs/mongodb1_log/:/var/log/mongodb/
+      #- C:\Users\EBITI\mongors-ca.crt:/etc/mongodb/ssl/mongors-ca.crt
+      #- C:\Users\EBITI\mongodb1.pem:/etc/mongodb/ssl/mongodb.pem
+      #- C:\Users\EBITI\final-client.pem:/etc/mongodb/ssl/final-client.pem
+    env_file:
+     ./mongod.env
+    command: mongod --config /etc/mongod.conf
+    depends_on:
+      - mongo-keys
+    networks:
+      - mongonet
+
+  mongodb2:
+    image: mongo:latest
+    hostname: mongodb2
+    container_name: mongodb2
+    ports:
+     - 30012:27017
+    restart: always
+    volumes:
+      - ./mongo/keys:/opt/keyfile/
+      - ./mongo/data/mongodb2:/data/db
+      - ./mongo/mongod.conf:/etc/mongod.conf
+      - ./mongo/logs/mongodb2_log/:/var/log/mongodb/
+      #- C:\Users\EBITI\mongors-ca.crt:/etc/mongodb/ssl/mongors-ca.crt
+      #- C:\Users\EBITI\mongodb2.pem:/etc/mongodb/ssl/mongodb.pem
+      #- C:\Users\EBITI\final-client.pem:/etc/mongodb/ssl/final-client.pem
+    env_file:
+     ./mongod.env
+    command: mongod --config /etc/mongod.conf
+    depends_on:
+      - mongo-keys
+    networks:
+      - mongonet
+
+  mongodb3:
+    image: mongo:latest
+    hostname: mongodb3
+    container_name: mongodb3
+    ports:
+     - 30013:27017
+    restart: always
+    volumes:
+      - ./mongo/keys:/opt/keyfile/
+      - ./mongo/data/mongodb3:/data/db
+      - ./mongo/mongod.conf:/etc/mongod.conf
+      - ./mongo/logs/mongodb3_log/:/var/log/mongodb/
+      #- C:\Users\EBITI\mongors-ca.crt:/etc/mongodb/ssl/mongors-ca.crt
+      #- C:\Users\EBITI\mongodb3.pem:/etc/mongodb/ssl/mongodb.pem
+      #- C:\Users\EBITI\final-client.pem:/etc/mongodb/ssl/final-client.pem
+    env_file:
+     ./mongod.env
+    command: mongod --config /etc/mongod.conf
+    depends_on:
+      - mongo-keys
+    networks:
+      - mongonet
+
+  activateuser:
+    build: 
+      context: ../Activate-User-Registration
+      dockerfile: Dockerfile
+    container_name: activateuser
+    ports: 
+      - 4000:4000
+    expose:
+      # Opens port 4000 on the container
+      - 4000
+    volumes: 
+      - .:/appact
+      - "/appact/node_modules"
+    depends_on:
+      - mongodb1
+      - mongodb2
+      - mongodb3
+    networks:
+      - mongonet
+
+networks:
+  mongonet:
+    driver: bridge

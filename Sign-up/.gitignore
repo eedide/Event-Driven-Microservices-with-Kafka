@@ -1,0 +1,9 @@
+/node_modules
+/Dockerfile
+/kafka
+/mysql.env
+/mysqlrouter.env
+/smartdev.env
+/mysql1data
+/mysql2data
+/mysql3data
