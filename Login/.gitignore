@@ -1,9 +1,4 @@
 /node_modules
-/Dockerfile
-/node_modules
 /.dockerignore
-/kafka
-/mysql.env
-/mysqlrouter.env
-/smartdev.env
 /Login_mysqldata
+.vscode
