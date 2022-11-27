@@ -14,7 +14,6 @@ services:
     volumes: 
       - .:/appdev
       - "/appdev/node_modules"
-    #command: 'bash -c "docker network connect sign-up_internalnet confirmuserreg"'
 
   rds:
     image: redis:7.0-rc2
@@ -28,9 +27,6 @@ services:
       - 6379:6379
     expose:
       - 6379
-    #command:
-      #!/usr/bin/bash
-      #docker network connect sign-up_internalnet redis-1
 
   rds-1:
     image: redis:7.0-rc2
@@ -44,9 +40,6 @@ services:
       - 6380:6379
     expose:
       - 6379
-    #command:
-      #!/usr/bin/bash
-      #docker network connect sign-up_internalnet redis-2
 
   rds-2:
     image: redis:7.0-rc2
@@ -60,9 +53,6 @@ services:
       - 6381:6379
     expose:
       - 6379
-    #command:
-      #!/usr/bin/bash
-      #docker network connect sign-up_internalnet redis-3
 
   sentinel-0:
     image: redis:7.0-rc2
