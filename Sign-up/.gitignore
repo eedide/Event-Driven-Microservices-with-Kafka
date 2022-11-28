@@ -1,9 +1,12 @@
 /node_modules
 /Dockerfile
 /kafka
-/mysql.env
 /mysqlrouter.env
 /smartdev.env
 /mysql1data
 /mysql2data
 /mysql3data
+.vscode
+/docker/mysqlcluster/
+/docker/mysqlrouter111/bootstrap.sh
+/docker/mysqlrouter222/bootstrap.sh
