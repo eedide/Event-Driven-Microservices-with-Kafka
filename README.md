@@ -25,4 +25,8 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>(10)Sign-up service adjusts or alters its database (mysql1) users table accordingly. If user's account activation succeeded, sign-up service alters it database user's status to ACTIVE otherwise status is left as INACTIVE. Now the distributed transaction between Sign-up and Activate-User-Registration is completed.</ul>
 <ul>(11) Procedure (2) is repeated</ul>
 <ul>(12) Procedure (3), (4) and (5) is repeated</ul>
-<ul>(13)</ul>
+<H3>Login</H3>
+<ul>(14)Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login and if successful, the authentication token is updated in the login_mysql database users table</ul>
+<ul>(15)debezium source connector (which i call loginconnector in the connector config later on) listening on login_mysql for changes captures the change and writes (16) it to login_db.users topic</ul>
+(17)jdbc sink connector for resetpassword (resetpassword-sink-connector) service which is a consumer of login_db.users topic consumes the updated authentication token. This is happening because a user who is not logged into the system cannot reset password (meaning the resetpassword service will not function without logging in and obtaining an authentication token), so the resetpassword service has to have the updated auth token of login service in its own database (rpwd_mysql)
+<ul>(18)</ul>
