@@ -48,4 +48,5 @@ and if successful, the authentication token is updated in the login_mysql databa
   . Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
 
 <H2>How to run the application</H2>
+#
 
