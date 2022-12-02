@@ -6,10 +6,10 @@ There are four services that together makeup the signup/login/reset-password app
 <H3>Sign-up</H3>
 <ul>Please following numbering on the diagram above.</ul>
 <ul>(1) Signup detail is submitted to the endpoint (http://localhost:8080/api/v1/dev/signup) and user detail is saved in mysql1 (assuming mysql1 is the primary at the moment) and an activation email is sent to the supplied email address. The record saved in mysql1 is replicated in mysql2 and mysql3 databases respectively. The user detail submitted to endpoint is in this format:
-  <pre><p>{</p>
+  <pre><label>{</label>
   <label>"email": "testing10@firstclicklimited.com",</label>
   <label>"password": "password"</label>
-  <p>}</p></pre>
+  <label>}</label></pre>
 </ul>
 <ul>
   (2) Next a debezium source connector (which i call signupconnector in the connector config later on) installed in kafkaconnect service listens for changes (insert, update and delete) in mysql1 database and records (3) those changes in the kafka topic called: users. This process is called change data capture (CDC).
