@@ -33,3 +33,6 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>(19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format: {
     "email": "testing48@firstclicklimited.com"
 }. Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
+
+<H2>How to run the application</H2>
+
