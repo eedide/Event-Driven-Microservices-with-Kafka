@@ -7,8 +7,8 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>Please following numbering on the diagram above.</ul>
 <ul>(1) Signup detail is submitted to the endpoint (http://localhost:8080/api/v1/dev/signup) and user detail is saved in mysql1 (assuming mysql1 is the primary at the moment) and an activation email is sent to the supplied email address. The record saved in mysql1 is replicated in mysql2 and mysql3 databases respectively. The user detail submitted to endpoint is in this format:
   <pre><p>{</p>
-  <p>"email": "testing10@firstclicklimited.com",</p>
-  <p>"password": "password"</p>
+  <label>"email": "testing10@firstclicklimited.com",</label>
+  <label>"password": "password"</label>
   <p>}</p></pre>
 </ul>
 <ul>
