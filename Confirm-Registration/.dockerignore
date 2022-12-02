@@ -1,9 +1,0 @@
-./.env
-./node_modules
-./redis
-./redis-slave1
-./redis-slave2
-./sentinel-0
-./sentinel-1
-./sentinel-2
-./redis
