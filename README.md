@@ -26,13 +26,20 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>(11) Procedure (2) is repeated</ul>
 <ul>(12) Procedure (3), (4) and (5) is repeated</ul>
 <H3>Login</H3>
-<ul>(14) Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login and if successful, the authentication token is updated in the login_mysql database users table</ul>
+<ul>(14) Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login
+  <pre><p>{</p>
+  <p>"email": "testing10@firstclicklimited.com",</p>
+  <p>"password": "password"</p>
+  <p>}</p></pre>  
+and if successful, the authentication token is updated in the login_mysql database users table</ul>
 <ul>(15) debezium source connector (which i call loginconnector in the connector config later on) listening on login_mysql for changes captures the change and writes (16) it to login_db.users topic</ul>
 <ul>(17) jdbc sink connector for resetpassword (resetpassword-sink-connector) service which is a consumer of login_db.users topic consumes the updated authentication token and sinks(18) it to the resetpassword service database (rpwd_mysql) users table. This is happening because a user who is not logged into the system cannot reset password (meaning the resetpassword service will not function without logging in and obtaining an authentication token), so the resetpassword service has to have the updated auth token of login service in its own database (rpwd_mysql)</ul>
 <H3>Reset-Password</H3>
-<ul>(19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format: {
-    "email": "testing48@firstclicklimited.com"
-}. Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
+<ul>(19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format:
+  <pre><p>{</p>
+  <p>"email": "testing48@firstclicklimited.com"</p>
+  <p>}</p></pre>
+  . Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
 
 <H2>How to run the application</H2>
 
