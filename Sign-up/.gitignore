@@ -10,3 +10,14 @@
 /docker/mysqlcluster/
 /docker/mysqlrouter111/bootstrap.sh
 /docker/mysqlrouter222/bootstrap.sh
+/kafkasinkconnector
+/nginx/keepalived/keepalived1/vip1.sh
+/nginx/keepalived/keepalived2/vip2.sh
+/nginx/startnginx.sh
+/zookeeper/zookeeper1/data/version-2/
+/zookeeper/zookeeper1/datalog/version-2/
+/zookeeper/zookeeper2/
+/zookeeper/zookeeper3/
+/zookeeper/zookeeper4/
+/zookeeper/zookeeper5/
+/mysqld.service

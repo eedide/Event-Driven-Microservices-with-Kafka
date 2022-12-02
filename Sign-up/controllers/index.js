@@ -74,6 +74,14 @@ const sign_up = async (req, res) => {
                             "msg" : "An error occurred during signup process. Please try again 2"
                         })
                     }
+
+                    //////////send mail to confirm registration//////////////
+                    //first create jwt token to be attached to mail
+                    const userEmail = { userEmail: req.body.email }//user obj
+                    const accessToken = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "24h" })
+                    //send mail
+                    sendMail(req.body.email, accessToken)
+
                     connection.release()
                     return res.status(201).json({
                         "status" : "success",
@@ -90,6 +98,33 @@ const sign_up = async (req, res) => {
             "msg" : "An error occurred during signup process. Please try again 3"
         });
     }
+}
+
+const sendMail = async (email, emailToken) => {
+    //try{
+        const url = `http://localhost:4000/api/v1/dev/confirmuserReg?token=${emailToken}`;
+        // create reusable transporter object using the default SMTP transport
+        let transporter = nodemailer.createTransport({
+            host: "smtp.hostinger.com",
+            port: 465,
+            secure: true, // true for 465, false for other ports
+            auth: {
+                user: "info@firstclicklimited.com",
+                pass: process.env.SMTP_Password,
+            },
+        });
+
+        // send mail with defined transport object
+        let info = await transporter.sendMail({
+            from: '"Smartdev Team" info@firstclicklimited.com',// sender address
+            to: email,//receiver
+            subject: "Account Activation",//Subject line
+            text: "Hello world?",//plain text body
+            html: `<h2>Smartdeveloper.tech Account Activation</h2><p>Hello ${email},<br>You are welcome to smartdeveloper.tech. Please click the link below to activate your account:<br><br> ${url} <br><br>If the link is not clickable, copy the complete url without any spaces, paste it on your browser and click enter.</p><br>Smartdev Team`//html body
+        });
+    /*}catch(err){
+        console.log("An error occured while sending user activation mail")
+    }*/
 }
 
 const Process_New_PW = async (req, res) => {

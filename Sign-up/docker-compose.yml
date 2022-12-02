@@ -67,21 +67,6 @@ services:
     networks:
       - internalnet
 
-  #mysqlcluster-conf:
-    #build: 
-      #context: ../Sign-up
-      #dockerfile: ./docker/mysqlcluster/Dockerfile
-    #container_name: mysqlcluster-conf
-    #restart: unless-stopped
-    #ports:
-      #- 2999:2999
-    #depends_on:
-      #- mysql1
-      #- mysql2
-      #- mysql3
-    #networks:
-      #- internalnet
-
   zookeeper1:
     image: zookeeper
     container_name: zookeeper1
@@ -259,20 +244,6 @@ services:
      - ./nginx/startnginx.sh:/etc/nginx/startnginx.sh
     networks:
      - internalnet
-
-  #LB_Test:
-    #image: centos
-    #container_name: Test_Container
-    #command: /usr/sbin/init
-    #ports:
-     #- 8082:80
-    #privileged: true
-    #depends_on:
-     #- signup
-     #- lbserver1
-     #- lbserver2
-    #networks:
-     #- internalnet
 
 networks:
   internalnet:
