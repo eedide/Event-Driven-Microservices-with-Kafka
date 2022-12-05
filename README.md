@@ -48,5 +48,13 @@ and if successful, the authentication token is updated in the login_mysql databa
   . Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
 
 <H2>How to run the application</H2>
-#
+1. Download zip file from this repository
+2. Extract zip file
+3. Open folder Event-Driven-Microservices-with-Kafka in your editor
+4. change directory to the folder Sign-up - cd Sign-up
+5. Create folder kafka in Sign-up folder root directory.
+6. Create subfolder kafka1 inside kafka folder.
+7. Create subfolders kafka_data and kafka_logs inside kafka1 folder. kafka_data and kafka_logs will be used to store kafka data and kafka logs.
+8. Create folders mysql1data, mysql2data and mysql3data in Sign-up folder root directory. These folders will be used to store mysql data.
+9. 
 
