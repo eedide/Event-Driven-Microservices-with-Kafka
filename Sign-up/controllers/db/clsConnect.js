@@ -3,7 +3,7 @@ var poolCluster = mysql.createPoolCluster();
 
 poolCluster.add('READ', {
   host : process.env.HOST,
-  port : process.env.ROPORT,
+  port : process.env.PORT,
   database: process.env.DATABASE,
   user : process.env.USER,
   password : process.env.PASSWORD,
@@ -13,7 +13,7 @@ poolCluster.add('READ', {
 
 poolCluster.add('WRITE',{
   host : process.env.HOST,
-  port : process.env.RWPORT,
+  port : process.env.PORT,
   database: process.env.DATABASE,
   user : process.env.USER,
   password : process.env.PASSWORD,

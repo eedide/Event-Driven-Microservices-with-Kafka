@@ -30,7 +30,7 @@ async function Update_User_Status(){
                     Activate_User(data.email)
                 }else{
                     //remove user from db
-                    Remove_User_From_DB(data.email)
+                    //Remove_User_From_DB(data.email)
                 }
             }
         })
@@ -43,7 +43,7 @@ async function Update_User_Status(){
 
 function Activate_User(user){
     const query = "UPDATE users SET User_status = 'ACTIVE' WHERE email=?";
-    poolCluster.getConnection("RW1", function(err, connectn){
+    poolCluster.getConnection("WRITE", function(err, connectn){
         if (err) {
             //log error
             console.log("An error occured in the system")
@@ -69,9 +69,9 @@ function Activate_User(user){
     })
 }
 
-function Remove_User_From_DB(user){
+/*function Remove_User_From_DB(user){
     const query = "DELETE FROM users WHERE email = ?";
-    poolCluster.getConnection("RW1", function (err, connectn) {
+    poolCluster.getConnection("WRITE", function (err, connectn) {
         if (err) {
             //log error
             console.log("An error occured in the system")
@@ -94,7 +94,7 @@ function Remove_User_From_DB(user){
             });
         }
     });
-}
+}*/
 
 /*async function Change_User_Password(){
     try{

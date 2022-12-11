@@ -15,7 +15,7 @@ const connection = mysql.createPool({
   user: process.env.USER,
   password: process.env.PASSWORD,
   database: process.env.DATABASE,
-  port: process.env.RWPORT,
+  port: process.env.PORT,
   connectionLimit: 20,
   /*ssl        : false,
   secureAuth : {

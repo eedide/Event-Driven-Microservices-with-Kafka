@@ -47,7 +47,7 @@ const sendMail = async (email, emailToken) => {
             secure: true, // true for 465, false for other ports
             auth: {
                 user: "info@firstclicklimited.com",
-                pass: process.env.PASSWORD,
+                pass: process.env.SMTP_PASSWORD,
             },
         });
 
@@ -61,6 +61,7 @@ const sendMail = async (email, emailToken) => {
         });
     }catch(err){
         console.log("An error occured while initiating password reset 2")
+        console.log(err)
     }
 }
 

@@ -82,7 +82,7 @@ services:
       - ./zookeeper/zookeeper1/datalog:/datalog
       - ./zookeeper/zookeeper1/logs:/logs
       - ./zookeeper/zookeeper1/config/zoo.cfg:/zookeeper/conf/zoo.cfg
-      - ./zookeeper/zookeeper1/myid:/zookeeper/data/myid
+      #- ./zookeeper/zookeeper1/myid:/zookeeper/data/myid
 
   kafka1:
     image: debezium/kafka:latest
@@ -149,13 +149,13 @@ services:
     build: 
       context: ../Sign-up
       dockerfile: ./docker/signup/Dockerfile
-    #container_name: signup
+    container_name: signup
     restart: unless-stopped
-    #ports: 
-      #- 3000:3000
-    #expose:
+    ports: 
+      - 3000:3000
+    expose:
       # Opens port 3000 on the container
-      #- 3000
+      - 3000
     volumes: 
       - ./:/app
       - "/app/node_modules"
@@ -168,82 +168,6 @@ services:
       - connect
     networks:
       - internalnet
-
-  mysqlrouter111:
-    build: 
-      context: ../Sign-up
-      dockerfile: ./docker/mysqlrouter111/Dockerfile
-    container_name: mysqlrouter111
-    command: /usr/sbin/init
-    ports:
-     - 3606:3306
-    expose:
-     - 3306
-    privileged: true
-    depends_on:
-     - signup
-    volumes:
-     - ./mysqlrouter111/keepalived/keepalived1/keepalived.conf:/etc/keepalived/keepalived.conf
-    networks:
-     - internalnet
-
-  mysqlroute222:
-    build: 
-      context: ../Sign-up
-      dockerfile: ./docker/mysqlrouter222/Dockerfile
-    container_name: mysqlrouter222
-    command: /usr/sbin/init
-    ports:
-     - 3607:3306
-    expose:
-     - 3306
-    privileged: true
-    depends_on:
-     - signup
-    volumes:
-     - ./mysqlrouter222/keepalived/keepalived2/keepalived.conf:/etc/keepalived/keepalived.conf
-    networks:
-     - internalnet
-
-  lbserver1:
-    build: 
-      context: ../Sign-up
-      dockerfile: ./docker/LB_Server1/Dockerfile
-    container_name: lbserver1
-    command: /usr/sbin/init
-    ports:
-     - 8080:80
-    privileged: true
-    depends_on:
-     - signup
-    volumes:
-     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-     - ./nginx/keepalived/check_nginx.sh:/etc/keepalived/check_nginx.sh
-     - ./nginx/keepalived/keepalived1/vip1.sh:/etc/keepalived/vip1.sh
-     - ./nginx/keepalived/keepalived1/keepalived.conf:/etc/keepalived/keepalived.conf
-     - ./nginx/startnginx.sh:/etc/nginx/startnginx.sh
-    networks:
-     - internalnet
-
-  lbserver2:
-    build: 
-      context: ../Sign-up
-      dockerfile: ./docker/LB_Server2/Dockerfile
-    container_name: lbserver2
-    command: /usr/sbin/init
-    ports:
-     - 8084:80
-    privileged: true
-    depends_on:
-     - signup
-    volumes:
-     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-     - ./nginx/keepalived/check_nginx.sh:/etc/keepalived/check_nginx.sh
-     - ./nginx/keepalived/keepalived2/vip2.sh:/etc/keepalived/vip2.sh
-     - ./nginx/keepalived/keepalived2/keepalived.conf:/etc/keepalived/keepalived.conf
-     - ./nginx/startnginx.sh:/etc/nginx/startnginx.sh
-    networks:
-     - internalnet
 
 networks:
   internalnet:

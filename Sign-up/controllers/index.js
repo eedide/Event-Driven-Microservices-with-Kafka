@@ -4,6 +4,7 @@ const poolCluster = require("./db/clsConnect")
 const bcrypt = require('bcryptjs');
 var promise = require('promise');
 const { reject, resolve } = require("promise");
+const nodemailer = require("nodemailer")
 //var dateTime = require('node-datetime');
 const jwt = require('jsonwebtoken')
 const NodeRSA = require('node-rsa');
@@ -44,11 +45,134 @@ const userExist = (email) => {
     })
 }
 
+const Confirm_Registration_Status = (email) => {
+    return new promise((resolve, reject) => {
+        const query = "SELECT user_status from users WHERE email = ?";
+        poolCluster.getConnection("READ", function (err, connection) { 
+            if (err) {
+                connection.release()
+                return reject({
+                    Reg_status : "failed",
+                    Reg_status_msg : ""
+                })
+            } else {
+                connection.query(query, [ email ], function(err, results) {
+                    if(err){
+                        //log error here
+                        return reject({
+                            Reg_status : "failed",
+                            Reg_status_msg : ""
+                        })
+                    }
+                    if (results.length < 1){
+                        return resolve({
+                            Reg_status : "failed",
+                            Reg_status_msg : ""
+                        });
+                    }
+                    const user = results[0];
+        
+                    return resolve({
+                        Reg_status : user.user_status,
+                        Reg_status_msg : ""
+                    })
+                });
+            }
+        });
+    })
+}
+
+const Is_Account_Under_Suspension = (req, res) => {
+    return new promise((resolve, reject) => {
+        const query = "SELECT Login_id, Suspension_reason FROM suspended_users WHERE email = ?";
+        poolCluster.getConnection("READ", function (err, connection) { 
+            if (err) {
+                connection.release();
+                //log error
+                return reject({
+                    sus_status : "failed",
+                    sus_status_msg : ""
+                })
+            } else {
+                connection.query(query, [ req.body.email ], function(err, results) {
+                    if(err){
+                        connection.release();
+                        //log error
+                        return reject({
+                            sus_status : "failed",
+                            sus_status_msg : ""
+                        })
+                    }
+                    if (results.length < 1){
+                        connection.release();
+                        return resolve({
+                            sus_status : "NOT_SUSPENDED",
+                            sus_status_msg : ""
+                        })
+                    }
+                    const user = results[0];
+        
+                    if(user.Login_id && user.Suspension_reason == "MULTIPLE_LOGIN_FAILURE"){
+                        connection.release();
+                        return resolve({
+                            sus_status : "SUSPENDED",
+                            sus_status_msg : "Multiple_Login_Failure"
+                        })
+                    }
+                    connection.release();
+                    return resolve({
+                        sus_status : "NOT_SUSPENDED",
+                        sus_status_msg : ""
+                    })
+                });
+            }
+        });
+    })
+}
+
 const sign_up = async (req, res) => {
     try{
         const { user_exist } = await userExist(req.body.email)
         if(user_exist == "failed") return res.status(500).json({ "status": "failed", "msg": "An error occured in the system. Try again" })
-        if(user_exist == "true") return res.status(500).json({ "status": "failed", "msg": "email is already registered" })
+        if(user_exist == "true"){
+            /*if user is INACTIVE and under suspension, return*/
+            //GET user registration status
+            const { Reg_status, Reg_status_msg } = await Confirm_Registration_Status(req.body.email)
+            if(Reg_status == "INACTIVE"){
+                //check if user is suspended
+                const {sus_status, sus_status_msg} = Is_Account_Under_Suspension(req, res)
+                if(sus_status == "SUSPENDED"){
+                    //user under suspension, cannot
+                    //receive activation email again
+                    return res.status(400).json({
+                        "status" : "failed",
+                        "msg" : "user under suspension"
+                    })
+                }else if(sus_status == "failed"){
+                    return res.status(500).json({
+                        "status" : "failed",
+                        "msg" : "something went wrong while checking sus_status"
+                    })
+                }else{
+                    //////////send mail to confirm registration//////////////
+                    //first create jwt token to be attached to mail
+                    const userEmail = { userEmail: req.body.email }//user obj
+                    const accessToken = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "24h" })
+                    //send mail
+                    await sendMail(req.body.email, accessToken)
+
+                    return res.status(200).json({
+                        "status" : "success",
+                        "msg" : "email is already registered, activation email re-sent"
+                    })
+                }
+            }else{
+                return res.status(400).json({
+                    "status": "failed",
+                    "msg": "email is already registered"
+                })
+            }
+        }
         const Hash = await bcrypt.hash(req.body.password, 10)
         //console.log(Hash)
         //insert user in db
@@ -85,7 +209,7 @@ const sign_up = async (req, res) => {
                     connection.release()
                     return res.status(201).json({
                         "status" : "success",
-                        "msg" : "user\'s record is successfully saved in database"
+                        "msg" : "user\'s registration activation email sent"
                     })
                 });
             }
@@ -101,7 +225,7 @@ const sign_up = async (req, res) => {
 }
 
 const sendMail = async (email, emailToken) => {
-    //try{
+    try{
         const url = `http://localhost:4000/api/v1/dev/confirmuserReg?token=${emailToken}`;
         // create reusable transporter object using the default SMTP transport
         let transporter = nodemailer.createTransport({
@@ -122,9 +246,10 @@ const sendMail = async (email, emailToken) => {
             text: "Hello world?",//plain text body
             html: `<h2>Smartdeveloper.tech Account Activation</h2><p>Hello ${email},<br>You are welcome to smartdeveloper.tech. Please click the link below to activate your account:<br><br> ${url} <br><br>If the link is not clickable, copy the complete url without any spaces, paste it on your browser and click enter.</p><br>Smartdev Team`//html body
         });
-    /*}catch(err){
+    }catch(err){
         console.log("An error occured while sending user activation mail")
-    }*/
+        //console.log(err)
+    }
 }
 
 const Process_New_PW = async (req, res) => {

@@ -1,2 +1,4 @@
-/mongo
+/mongo/data
+/mongo/keys
+/mongo/logs
 /node_modules
