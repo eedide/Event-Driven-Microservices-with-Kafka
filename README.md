@@ -8,7 +8,7 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>(1) Signup detail is submitted to the endpoint (http://localhost:3000/api/v1/dev/signup) and user detail is saved in mysql1 (assuming mysql1 is the primary at the moment) and an activation email is sent to the supplied email address. The record saved in mysql1 is replicated in mysql2 and mysql3 databases respectively. The user detail submitted to endpoint is in this format:
   <pre>
   <label>{</label>
-    <label>"email": "testing10@firstclicklimited.com",</label>
+    <label>"email": "testing1@firstclicklimited.com",</label>
     <label>"password": "password"</label>
   <label>}</label>
   </pre>
@@ -31,7 +31,7 @@ There are four services that together makeup the signup/login/reset-password app
 <ul>(14) Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login
   <pre>
   <label>{</label>
-    <label>"email": "testing10@firstclicklimited.com",</label>
+    <label>"email": "testing1@firstclicklimited.com",</label>
     <label>"password": "password"</label>
   <label>}</label>
   </pre>  
@@ -42,7 +42,7 @@ and if successful, the authentication token is updated in the login_mysql databa
 <ul>(19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format:
   <pre>
   <label>{</label>
-    <label>"email": "testing48@firstclicklimited.com"</label>
+    <label>"email": "testing1@firstclicklimited.com"</label>
   <label>}</label>
   </pre>
   . Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
@@ -282,7 +282,7 @@ and if successful, the authentication token is updated in the login_mysql databa
 13. To signup as a user, you need to submit a post request in this format:
 
         {
-          "email": "testing10@firstclicklimited.com",
+          "email": "testing1@firstclicklimited.com",
           "password": "password"
         }
     
@@ -525,7 +525,7 @@ restart nodemon - click anywhere in the Activate_User.js file in the Activate-Us
 
 25. Check your mail, copy and paste the link, press enter and if all is well, you should see a console response like this:
 
-        User email is: testing6@firstclicklimited.com
+        User email is: testing1@firstclicklimited.com
         Status is: 200
         Status is: 200
         Latest status is: 200
@@ -543,7 +543,7 @@ restart nodemon - click anywhere in the Activate_User.js file in the Activate-Us
       [
         {
           _id: ObjectId("63908c2b7af343ab278c7158"),
-          email: 'testing6@firstclicklimited.com',
+          email: 'testing1@firstclicklimited.com',
           status: 'ACTIVE',
           __v: 0
         }
@@ -563,7 +563,7 @@ restart nodemon - click anywhere in the Activate_User.js file in the Activate-Us
 
        use signup_db
 
-       select * from users where email = 'testing6@firstclicklimited.com';
+       select * from users where email = 'testing1@firstclicklimited.com';
 
   if all goes well, you should see User_status column as ACTIVE.
 
@@ -745,7 +745,7 @@ The connector also takes users record that was sinked from the mysql1 database u
 31. Now to login, submit a post request to the endpoint "http://localhost:8000/api/v1/dev/login". The post data looks thus:
 
         {
-            "email": "testing6@firstclicklimited.com",
+            "email": "testing1@firstclicklimited.com",
             "password": "password"
         }
 
@@ -831,7 +831,7 @@ The connector also takes users record that was sinked from the mysql1 database u
 
     and then
 
-        select * from users where email = "testing6@firstclicklimited.com";
+        select * from users where email = "testing1@firstclicklimited.com";
 
     you should find that the password has been updated here also.
 
