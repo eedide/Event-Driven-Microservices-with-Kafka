@@ -12,8 +12,8 @@ Sign-up
 (1) Signup detail is submitted to the endpoint (http://localhost:3000/api/v1/dev/signup) and user detail is saved in mysql1 (assuming mysql1 is the primary at the moment) and an activation email is sent to the supplied email address. The record saved in mysql1 is replicated in mysql2 and mysql3 databases respectively. The user detail submitted to endpoint is in this format:
 
         {
-        "email": "testing1@firstclicklimited.com",
-        "password": "password"
+            "email": "testing1@firstclicklimited.com",
+            "password": "password"
         }
 
 
@@ -34,8 +34,8 @@ Login
 (14) Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login
 
         {
-        "email": "testing1@firstclicklimited.com",
-        "password": "password"
+            "email": "testing1@firstclicklimited.com",
+            "password": "password"
         }
 
 and if successful, the authentication token is updated in the login_mysql database users table
@@ -45,7 +45,7 @@ Reset-Password
 (19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format:
 
         {
-        "email": "testing1@firstclicklimited.com"
+            "email": "testing1@firstclicklimited.com"
         }
 
 resetpassword service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, resetpassword service saves the new password in rpwd_mysql database users table.
