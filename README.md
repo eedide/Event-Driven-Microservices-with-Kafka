@@ -1,10 +1,13 @@
 # Event Driven Microservices with Kafka and Docker
 This is a demonstration of event driven microservices using kafka. The application consist of multiple services, and together these services provide the overall functionality of a complete signup/login/reset password system. This is a backend application developed with nodejs and several backend tools.
 ![system architecture 2](https://user-images.githubusercontent.com/3667737/204997563-9bb1d963-fc89-4d37-87e4-e2aa8ed06472.png)
-<H2>Explaination</H2>
-There are four services that together makeup the signup/login/reset-password application - Sign-up, Activate-User-Registration, Login and Reset-Password. Each of these four services writes to its own database.
+
+Explaination
+
+There are four services that together makeup the signup/login/reset-password application - signup, activateuser, Login and resetpassword. Each of these four services writes to its own database and these databases are also services on their own - meaning that in total, there are more than four services in this application.
+
 <H3>Sign-up</H3>
-<ul>Please following numbering on the diagram above.</ul>
+<ul>Please follow the numbering on the diagram above.</ul>
 <ul>(1) Signup detail is submitted to the endpoint (http://localhost:3000/api/v1/dev/signup) and user detail is saved in mysql1 (assuming mysql1 is the primary at the moment) and an activation email is sent to the supplied email address. The record saved in mysql1 is replicated in mysql2 and mysql3 databases respectively. The user detail submitted to endpoint is in this format:
   <pre>
   <label>{</label>
@@ -17,14 +20,14 @@ There are four services that together makeup the signup/login/reset-password app
   (2) Next a debezium source connector (which i call signupconnector in the connector config later on) installed in kafkaconnect service listens for changes (insert, update and delete) in mysql1 database and records (3) those changes in the kafka topic called: users. This process is called change data capture (CDC).
 </ul>
 <ul>
-  (4) jdbc sink connector for login_mysql (called login-sink-connector later on) which is a consumer of the users topic takes the user's record written to users topic and sinks (5) it to the login_mysql database immediately. Now that users records from mysql1 is sank into login_mysql, the two services: sign-up and login can work with independent databases. Login service does not have to depend on mysql1 database and vice versa. Note that only selected fields of the user's table structure of mysql1 can be extracted and sank into login_mysql (all depends on the login service requirement). Another advantage of having every service to work with its own database is that the table structure of a database can be changed to fit the requirements of a particular service without affecting another service.
+  (4) jdbc sink connector for login_mysql (called login-sink-connector later on) which is a consumer of the users topic takes the user's record written to users topic and sinks (5) it to the login_mysql database immediately. Now that users records from mysql1 is sank into login_mysql, the two services: signup and Login can work with independent databases. Login service does not have to depend on mysql1 database and vice versa. Note that only selected fields of the user's table structure of mysql1 can be extracted and sank into login_mysql (all depends on the login service requirement). Another advantage of having every service to work with its own database is that the table structure of a database can be changed to fit the requirements of a particular service without affecting another service.
 </ul>
 <H3>Activate-User-Registration</H3>
-<ul>Note that signup process is not yet completed. Signup can only be completed if everything goes well in this service. The complete process of signup is a distrubuted transaction between Sign-up and Activate-User-Registration in the sense that if the user clicks on the email link that was sent previously and the account is successfully activated, Activate-User-Registration calls back on Sign-up alerting it to change the status of the user from INACTVE to ACTIVE otherwise alerts it that activation failed in which case the status of the user in mysql1 users table is left as INACTIVE and the transaction is completed. Note that Activate-User-Registration service also alter user status in its own database (mongodb1 - assuming its the primary) accordingly</ul>
+<ul>Note that signup process is not yet completed. Signup can only be completed if everything goes well in this service. The complete process of signup is a distrubuted transaction between signup and activateuser in the sense that if the user clicks on the email link that was sent previously and the account is successfully activated, activateuser calls back on signup alerting it to change the status of the user from INACTVE to ACTIVE otherwise alerts it that activation failed in which case the status of the user in mysql1 users table is left as INACTIVE and the transaction is completed. Note that activateuser service also alters user status in its own database (mongodb1 - assuming its the primary server at the time) accordingly</ul>
 <ul>(6)User's activation link is submitted to the endpoint (http://localhost:4000/api/v1/dev/confirmuserReg?token=one-time-jwt-will-be-here) and user activation status (ACTIVE or INACTIVE) is saved in mongodb1. ACTIVE is saved if everything is well, otherwise INACTIVE is inserted</ul>
 <ul>(7)Debezium source connector (mongonewuserconnector) listening on mongodb1 to capture data changes captures the changed data and writes (8) it to mongoserver1.activate_user_reg_db.active_users kafka topic (short formed as active_users in the diagram above)</ul>
-<ul>(9)Sign-up service (which is a consumer of the active_users topic) consumes the changes made to the active_users topic (this is how sign-up service knows if users activation succeeded or failed)</ul>
-<ul>(10)Sign-up service adjusts or alters its database (mysql1) users table accordingly. If user's account activation succeeded, sign-up service alters it database user's status to ACTIVE otherwise status is left as INACTIVE. Now the distributed transaction between Sign-up and Activate-User-Registration is completed.</ul>
+<ul>(9)signup service (which is a consumer of the active_users topic) consumes the changes made to the active_users topic (this is how signup service knows if users activation succeeded or failed)</ul>
+<ul>(10)signup service adjusts or alters its database (mysql1) users table accordingly. If user's account activation succeeded, signup service alters it database user's status to ACTIVE otherwise status is left as INACTIVE. Now the distributed transaction between signup and activateuser is completed.</ul>
 <ul>(11) Procedure (2) is repeated</ul>
 <ul>(12) Procedure (3), (4) and (5) is repeated</ul>
 <H3>Login</H3>
@@ -45,13 +48,13 @@ and if successful, the authentication token is updated in the login_mysql databa
     <label>"email": "testing1@firstclicklimited.com"</label>
   <label>}</label>
   </pre>
-  . Reset-Password service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, Reset-Password service saves the new password in rpwd_mysql database users table.</ul>
+  . resetpassword service processes the request and sends a password reset link to the user's email address. When user clicks on the resetpassword link, if all is well, resetpassword service saves the new password in rpwd_mysql database users table.</ul>
 
 <H2>How to run the application</H2>
 1. Download zip file from this repository
 2. Extract zip file
 3. Open folder Event-Driven-Microservices-with-Kafka in your code editor
-4. Open a new terminal and change directory to the folder Sign-up - cd Sign-up
+4. Open a new terminal and change directory to the folder signup - cd Sign-up
 5. Create folder kafka in Sign-up folder root directory.
 6. Create subfolder kafka1 inside kafka folder.
 7. Create subfolders kafka_data and kafka_logs inside kafka1 folder. kafka_data and kafka_logs will be used to store kafka data and kafka logs.
@@ -420,7 +423,7 @@ and if successful, the authentication token is updated in the login_mysql databa
 
         docker-compose up --build
 
-    Once the Activate-User-Registration service is running, we have to setup the mongo database (which i have used as the database for this service). For convinience, i am using a replica set (just like in the case of signup service where i used a mysql innodb cluster).
+    Once the activateuser service is running, we have to setup the mongo database (which i have used as the database for this service). For convinience, i am using a replica set (just like in the case of signup service where i used a mysql innodb cluster).
 
 17. Open a new tab to login to the mongo shell to configure our mongodb replica set.
 
@@ -551,7 +554,7 @@ restart nodemon - click anywhere in the Activate_User.js file in the Activate-Us
 
   if user activation wasn't successful, status will be INACTIVE
 
-  Now remember that mongodb is the database for Activate-User-Registration service and what we have designed is that once a data change occurs in this service's database, the debezium source connector "mongonewuserconnector" should pick it up and write it to the kafka topic "mongoserver1.activate_user_reg_db.active_users", Sign-up service (which is subscribed to mongoserver1.activate_user_reg_db.active_users) then acts depending on the user's status record written to the kafka topic. signup service either activate's the user's account (in the users table of mysql1) or otherwise allow the user's status to remain in an INATIVE state. INACTIVE here suggest that something were wrong while trying to activate user's account when the user clicked on the activation link.
+  Now remember that mongodb is the database for activateuser service and what we have designed is that once a data change occurs in this service's database, the debezium source connector "mongonewuserconnector" should pick it up and write it to the kafka topic "mongoserver1.activate_user_reg_db.active_users", signup service (which is subscribed to mongoserver1.activate_user_reg_db.active_users) then acts depending on the user's status record written to the kafka topic. signup service either activate's the user's account (in the users table of mysql1) or otherwise allow the user's status to remain in an INATIVE state. INACTIVE here suggest that something were wrong while trying to activate user's account when the user clicked on the activation link.
 
   Now log into your mysql1 client and check the User_status column of the user table and you will see that the status has changed to ACTIVE. RUN the command:
 
@@ -628,7 +631,7 @@ restart nodemon - click anywhere in the Activate_User.js file in the Activate-Us
         PRIMARY KEY (`session_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-29. install the login-sink-connector which will be responsible for sinking users table of sign-up service to users table of login service. Post the following login-sink-connector config to the endpoint http://localhost:8083/connectors/
+29. install the login-sink-connector which will be responsible for sinking users table of signup service to users table of login service. Post the following login-sink-connector config to the endpoint http://localhost:8083/connectors/
 
         {
             "name": "login-sink-connector",
@@ -756,7 +759,7 @@ The connector also takes users record that was sinked from the mysql1 database u
             "message": "Loggedin"
         }
 
-    Now that you are logged in, we can now move on to the Reset-Password service.
+    Now that you are logged in, we can now move on to the resetpassword service.
 
 32. First
 
