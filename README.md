@@ -30,7 +30,9 @@ Note that signup process is not yet completed. Signup can only be completed if e
 (10)signup service adjusts or alters its database (mysql1) users table accordingly. If user's account activation succeeded, signup service alters it database user's status to ACTIVE otherwise status is left as INACTIVE. Now the distributed transaction between signup and activateuser is completed.
 (11) Procedure (2) is repeated
 (12) Procedure (3), (4) and (5) is repeated
+
 Login
+
 (14) Should have labeled this as (13) in the diagram (my mistake). Anyways, user submits login detail to endpoint http://localhost:8000/api/v1/dev/login
 
         {
@@ -41,7 +43,9 @@ Login
 and if successful, the authentication token is updated in the login_mysql database users table
 (15) debezium source connector (which i call loginconnector in the connector config later on) listening on login_mysql for changes captures the change and writes (16) it to login_db.users topic
 (17) jdbc sink connector for resetpassword (resetpassword-sink-connector) service which is a consumer of login_db.users topic consumes the updated authentication token and sinks(18) it to the resetpassword service database (rpwd_mysql) users table. This is happening because a user who is not logged into the system cannot reset password (meaning the resetpassword service will not function without logging in and obtaining an authentication token), so the resetpassword service has to have the updated auth token of login service in its own database (rpwd_mysql)
+
 Reset-Password
+
 (19) User submits reset password request to the endpoint (http://localhost:4001/api/v1/dev//resetPW). The data submitted to the endpoint is in this format:
 
         {
